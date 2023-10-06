@@ -95,7 +95,7 @@ import { ElButton, ElInput, ElMessage, ElOption, ElSelect } from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 
-import { MD5 } from '../../scripts/md5'
+import { MD5 } from '~/logic/md5'
 import { appid, copyType, key, readType, themeIsDark } from '~/logic/storage'
 import Setting from '~/components/Setting.vue'
 
@@ -441,3 +441,4 @@ html.dark {
   transition: all 300ms 400ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 </style>
+../logic/md5
