@@ -1,5 +1,9 @@
 {
   "extends": "@antfu",
+  "ignorePatterns": [
+    "*.png",
+    "*.svg"
+  ],
   "rules": {
     "vue/component-tags-order": [
       "error",

@@ -2,8 +2,8 @@
   <main class="w-268px px-4 text-center">
     <Setting v-if="showSetting || !appid || !key" v-model="showSetting" />
     <div v-else>
-      <h2 class="text-16px my-2.5 flex items-center justify-center mb-10px">
-        <img class="w-20px mr-4px" src="../assets/icon.svg" @click="translateText">
+      <h2 class="text-16px my-3 flex items-center justify-center">
+        <img class="w-22px mr-6px" src="../assets/icon.svg">
         简单翻译
       </h2>
       <ElInput
@@ -42,18 +42,36 @@
         <ElButton v-if="showRetry" type="primary" size="small" @click="translateText">
           <div mr-1 i-carbon-reset /> 重试
         </ElButton>
-
         <div class="flex items-center justify-end flex-1">
+          <ElDropdown placement="top" @command="handleCommand">
+            <div
+              i-carbon-code
+              class="cursor-pointer mr-3.3 !text-16px text-dark dark:text-light"
+              hover="opacity-90"
+              title="译文命名"
+            />
+            <template #dropdown>
+              <ElDropdownMenu>
+                <ElDropdownItem
+                  v-for="item in nameTypes.slice(0, 7)"
+                  :key="item.split('：')[0]"
+                  :command="item.split('：')[0]"
+                >
+                  {{ item.split('：')[0] }}
+                </ElDropdownItem>
+              </ElDropdownMenu>
+            </template>
+          </ElDropdown>
           <div
             i-carbon-copy
-            class="cursor-pointer mr-3"
+            class="cursor-pointer mr-3.3"
             hover="opacity-90"
             title="复制译文"
             @click="copyFn"
           />
           <div
             i-carbon-volume-up
-            class="cursor-pointer mr-3"
+            class="cursor-pointer mr-3.3"
             hover="opacity-90"
             title="朗读译文"
             @click="readResult"
@@ -91,12 +109,12 @@
 
 <script setup lang="ts">
 import { useClipboard, useDebounceFn, useFetch } from '@vueuse/core'
-import { ElButton, ElInput, ElMessage, ElOption, ElSelect } from 'element-plus'
+import { ElButton, ElDropdown, ElDropdownItem, ElDropdownMenu, ElInput, ElMessage, ElOption, ElSelect } from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 
 import { MD5 } from '~/logic/md5'
-import { appid, copyType, key, readType, themeIsDark } from '~/logic/storage'
+import { appid, copyType, key, nameType, nameTypes, readType, themeIsDark } from '~/logic'
 import Setting from '~/components/Setting.vue'
 
 watchEffect(() => {
@@ -121,13 +139,72 @@ const langdetect = useFetch(langdetectUrl, { immediate: false }).json()
 const translateUrl = computed(() => `${TRANSLATE_URL}?from=${from.value}&to=${to.value}&q=${encodeURI(query.value)}&appid=${appid.value}&salt=${salt}&sign=${sign.value}`)
 const translate = useFetch(translateUrl, { immediate: false }).json()
 
-const result = computed(() => {
+// 朗读译文
+const readText = computed(() => {
   const trans_result = translate.data.value?.trans_result
   if (trans_result)
     return trans_result.map((v: any) => v.dst).join('\n')
   else return ''
 })
 
+// 译文
+const result = ref()
+
+watch(readText, () => {
+  if (readText.value)
+    setResult(nameType.value)
+})
+
+function handleCommand(name: string) {
+  if (readText.value) {
+    setResult(name)
+  }
+  else {
+    ElMessage.warning({
+      message: '译文为空',
+      duration: 1500,
+    })
+  }
+}
+
+function setResult(type: string) {
+  if (type === '默认' || to.value !== 'en')
+    result.value = readText.value
+
+  const lowercase = readText.value.toLowerCase().trim()
+
+  if (type === '小写')
+    result.value = lowercase
+
+  else if (type === '大写')
+    result.value = lowercase.toUpperCase()
+
+  else if (type === '常量')
+    result.value = lowercase.toUpperCase().replace(/ /g, '_')
+
+  else if (type === '首字母大写')
+    result.value = lowercase.replace(/(\s|^)[a-z]/g, (L: string) => L.toUpperCase())
+
+  else if (type === '小驼峰')
+    result.value = lowercase.replace(/(\s|^)[a-z]/g, (L: string) => L.toUpperCase()).replace(/ /g, '').replace(/(\s|^)[A-Z]/g, (L: string) => L.toLowerCase())
+
+  else if (type === '大驼峰')
+    result.value = lowercase.replace(/(\s|^)[a-z]/g, (L: string) => L.toUpperCase()).replace(/ /g, '')
+
+  else if (type === '下划线')
+    result.value = lowercase.replace(/ /g, '_')
+
+  else if (type === '大写下划线')
+    result.value = lowercase.replace(/(\s|^)[a-z]/g, (L: string) => L.toUpperCase()).replace(/ /g, '_')
+
+  else if (type === '中划线')
+    result.value = lowercase.replace(/ /g, '-')
+
+  else if (type === '大写中划线')
+    result.value = lowercase.replace(/(\s|^)[a-z]/g, (L: string) => L.toUpperCase()).replace(/ /g, '-')
+}
+
+// 复制
 const { copy } = useClipboard()
 watchEffect(() => {
   if (copyType.value === '自动复制' && from.value === 'zh' && to.value === 'en')
@@ -150,8 +227,9 @@ function copyFn() {
   }
 }
 
+// 朗读
 function readResult() {
-  if (!result.value) {
+  if (!readText.value) {
     ElMessage.warning({
       message: '译文为空',
       duration: 1500,
@@ -160,14 +238,14 @@ function readResult() {
   }
 
   if (readType.value === '浏览器API') {
-    const utterance = new SpeechSynthesisUtterance(result.value)
+    const utterance = new SpeechSynthesisUtterance(readText.value)
     utterance.rate = 0.6
     speechSynthesis.speak(utterance)
     return
   }
 
   const audio = new Audio()
-  audio.src = `${Read_Url}?lan=${to.value}&text=${encodeURI(result.value)}&spd=3&source=web`
+  audio.src = `${Read_Url}?lan=${to.value}&text=${encodeURI(readText.value)}&spd=3&source=web`
   audio.play()
 
   audio.addEventListener('ended', () => {
@@ -178,13 +256,20 @@ function readResult() {
     audio.remove()
 
     // 使用 js api 阅读
-    const utterance = new SpeechSynthesisUtterance(result.value)
+    const utterance = new SpeechSynthesisUtterance(readText.value)
     utterance.rate = 0.5
     speechSynthesis.speak(utterance)
   })
 }
 
+const showRetry = ref(false)
+// 防抖
 const translateFn = useDebounceFn(() => {
+  if (!query.value) {
+    result.value = ''
+    showRetry.value = false
+    return
+  }
   langdetect.execute().then(() => {
     if (langdetect.data.value.error === 0) {
       from.value = langdetect.data.value.lan
@@ -203,9 +288,13 @@ const translateFn = useDebounceFn(() => {
   })
 }, 1000)
 
-const showRetry = ref(false)
+// 翻译
 function translateText() {
-  showRetry.value = false
+  if (!query.value) {
+    result.value = ''
+    showRetry.value = false
+    return
+  }
 
   translate.execute()
     .then(() => {
@@ -441,4 +530,3 @@ html.dark {
   transition: all 300ms 400ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 </style>
-../logic/md5

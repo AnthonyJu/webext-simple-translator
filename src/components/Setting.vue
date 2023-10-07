@@ -13,8 +13,19 @@
     </template>
   </ElPageHeader>
   <ElForm ref="formRef" :model="form" :rules="rules" class="mt-3" label-width="68px" :inline="false">
+    <ElFormItem label="命名" required>
+      <ElSelect v-model="nameType" class="!w-full" popper-class="popper-nameType">
+        <ElOption value="默认" />
+        <ElOption v-for="item in nameTypes" :key="item" :value="item.split('：')[0]">
+          <span class="float-left">{{ item.split('：')[0] }}</span>
+          <span class="float-right text-$el-text-color-secondary text-10px">
+            {{ item.split('：')[1] }}
+          </span>
+        </ElOption>
+      </ElSelect>
+    </ElFormItem>
     <ElFormItem label="复制" required>
-      <ElSelect v-model="copyType">
+      <ElSelect v-model="copyType" class="!w-full">
         <ElOption value="自动复制">
           <span class="float-left">自动复制</span>
           <span class="float-right text-$el-text-color-secondary text-10px">
@@ -30,16 +41,16 @@
       </ElSelect>
     </ElFormItem>
     <ElFormItem label="朗读" required>
-      <ElSelect v-model="readType">
+      <ElSelect v-model="readType" class="!w-full">
         <ElOption value="百度API" />
         <ElOption value="浏览器API" />
       </ElSelect>
     </ElFormItem>
-    <ElFormItem label="APP ID" prop="appid">
-      <ElInput v-model="form.appid" />
+    <ElFormItem label="APPID" prop="appid">
+      <ElInput v-model="form.appid" type="password" show-password />
     </ElFormItem>
     <ElFormItem label="密钥" prop="key">
-      <ElInput v-model="form.key" />
+      <ElInput v-model="form.key" type="password" show-password />
     </ElFormItem>
   </ElForm>
   <div class="flex justify-center mb-4">
@@ -57,7 +68,7 @@
 <script setup lang="ts">
 import { ElForm, ElFormItem, ElInput, ElOption, ElPageHeader, ElSelect, ElTooltip } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { appid, copyType, key, readType } from '~/logic/storage'
+import { appid, copyType, key, nameType, nameTypes, readType } from '~/logic'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 
@@ -85,5 +96,8 @@ function handleBack() {
 <style>
 .el-page-header__left{
   margin-right: 0;
+}
+.popper-nameType{
+  height: 218px;
 }
 </style>
