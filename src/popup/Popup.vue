@@ -207,7 +207,7 @@ function setResult(type: string) {
 // 复制
 const { copy } = useClipboard()
 watchEffect(() => {
-  if (copyType.value === '自动复制' && from.value === 'zh' && to.value === 'en')
+  if (copyType.value === '自动复制' && from.value === 'zh' && to.value === 'en' && result.value)
     copyFn()
 })
 function copyFn() {
