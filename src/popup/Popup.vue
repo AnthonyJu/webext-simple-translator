@@ -3,7 +3,7 @@
     <Setting v-if="showSetting || !appid || !key" v-model="showSetting" />
     <div v-else>
       <h2 class="text-16px my-3 flex items-center justify-center">
-        <img class="w-22px mr-6px" src="../assets/icon.svg">
+        <img class="w-22px mr-6px" src="../assets/icon-512.png">
         简单翻译
       </h2>
       <ElInput
