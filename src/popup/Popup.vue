@@ -19,15 +19,15 @@
       />
       <div class="flex items-center my-15px gap-20px">
         <ElSelect v-model="from">
-          <ElOption label="自动检测" value="auto" @click="query && translateText()" />
-          <ElOption label="中文" value="zh" @click="query && translateText()" />
-          <ElOption label="英文" value="en" @click="query && translateText()" />
+          <ElOption label="自动检测" value="auto" @click="translateText()" />
+          <ElOption label="中文" value="zh" @click="translateText()" />
+          <ElOption label="英文" value="en" @click="translateText()" />
         </ElSelect>
         <div v-if="!langdetect.isFetching.value && !translate.isFetching.value" class="text-32px rotate-90" i-carbon-mac-shift />
         <div v-else class="text-32px animate-spin" i-mingcute-loading-fill />
         <ElSelect v-model="to">
-          <ElOption label="中文" value="zh" @click="query && translateText()" />
-          <ElOption label="英文" value="en" @click="query && translateText()" />
+          <ElOption label="中文" value="zh" @click="translateText()" />
+          <ElOption label="英文" value="en" @click="translateText()" />
         </ElSelect>
       </div>
       <ElInput

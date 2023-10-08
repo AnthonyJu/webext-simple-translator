@@ -47,10 +47,10 @@
       </ElSelect>
     </ElFormItem>
     <ElFormItem label="APPID" prop="appid">
-      <ElInput v-model="form.appid" type="password" show-password />
+      <ElInput v-model.trim="form.appid" type="password" show-password />
     </ElFormItem>
     <ElFormItem label="密钥" prop="key">
-      <ElInput v-model="form.key" type="password" show-password />
+      <ElInput v-model.trim="form.key" type="password" show-password />
     </ElFormItem>
   </ElForm>
   <div class="flex justify-center mb-4">
