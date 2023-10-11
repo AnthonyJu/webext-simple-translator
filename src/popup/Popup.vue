@@ -322,6 +322,9 @@ function translateText() {
         showRetry.value = true
         ElMessage.error(msg)
       }
+      else {
+        showRetry.value = false
+      }
     })
     .catch(() => {
       showRetry.value = true
